@@ -1873,8 +1873,10 @@ namespace glwrap
 
 		std::vector<int>::iterator nodeItr = _scene.m_nodes.begin();
 
-		// Resize nodes vector to prepare for assembly
+		// Resize nodes and parts vectors to prepare for assembly
 		m_allNodes.resize(_nodes.size());
+		m_parts.reserve(_meshes.size());
+		int partsInit = 0;
 
 		// Prepare nodes to initialised
 		while (nodeItr != _scene.m_nodes.end())
@@ -1983,8 +1985,8 @@ namespace glwrap
 					// Initialise part if required
 					if (!currentPart)
 					{
-						m_parts.push_back(m_context->createModelJoint(currentMesh->m_name));
-						currentPart = &m_parts.back();
+						m_context->createModelJoint(m_parts.at(partsInit), currentMesh->m_name);
+						currentPart = &m_parts.at(partsInit++);
 						assembleModelJoint(currentPart, currentModelNode,
 							currentMesh, _accessors, _data,
 							_meshes, _materials);

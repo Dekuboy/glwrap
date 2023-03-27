@@ -7,18 +7,14 @@ namespace glwrap
 		m_components = 0;
 		m_dirty = false;
 		m_isFloat = true;
+		m_id = 0;
 
-		glGenBuffers(1, &m_id);
-
-		if (!m_id)
-		{
-			throw std::exception();
-		}
+		m_context = nullptr;
 	}
 
 	VertexBuffer::~VertexBuffer()
 	{
-		glDeleteBuffers(1, &m_id);
+		if (m_id) glDeleteBuffers(1, &m_id);
 	}
 
 	void VertexBuffer::add(glm::vec2 _value)
@@ -123,6 +119,16 @@ namespace glwrap
 	{
 		if (m_dirty)
 		{
+			if (!m_id)
+			{
+				glGenBuffers(1, &m_id);
+
+				if (!m_id)
+				{
+					throw std::exception();
+				}
+			}
+
 			glBindBuffer(GL_ARRAY_BUFFER, m_id);
 			if (m_isFloat)
 			{

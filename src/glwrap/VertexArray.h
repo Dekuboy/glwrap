@@ -48,7 +48,7 @@ namespace glwrap
 		/**
 		* \brief Retrieve all the parts that make up the model
 		*/
-		const std::vector<ObjPart>& getParts();
+		const std::vector<ObjPart*>& getParts();
 		/**
 		* \brief Retrieve part that is called _name
 		*/

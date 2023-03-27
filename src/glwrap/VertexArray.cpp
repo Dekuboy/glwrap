@@ -111,7 +111,11 @@ namespace glwrap
 
 	VertexArray::~VertexArray()
 	{
-
+		for (std::vector<ObjPart*>::iterator itr = m_parts.begin();
+			itr != m_parts.end(); itr++)
+		{
+			delete (*itr);
+		}
 	}
 
 	void VertexArray::parse(std::string _path)
@@ -163,9 +167,9 @@ namespace glwrap
 			if (splitLine.at(0) == "o" || splitLine.at(0) == "g")
 			{
 				m_parts.resize(m_parts.size() + 1);
-				m_context->createPart(m_parts.back(), m_self, splitLine.at(1));
+				m_context->createPart(&m_parts.back(), m_self, splitLine.at(1));
 				countTris.push_back(fcounter);
-				currentPart = &m_parts.back();
+				currentPart = m_parts.back();
 				fcounter = 0;
 
 				currentPart->generateArrays();
@@ -331,8 +335,8 @@ namespace glwrap
 				if (!currentPart)
 				{
 					m_parts.resize(m_parts.size() + 1); 
-					m_context->createPart(m_parts.back(), m_self, "Default");
-					currentPart = &m_parts.back();
+					m_context->createPart(&m_parts.back(), m_self, "Default");
+					currentPart = m_parts.back();
 				}
 				currentPart->addFace(&m_faces.back());
 
@@ -428,7 +432,7 @@ namespace glwrap
 		for (int itr = 0; itr < countTris.size(); itr++)
 		{
 			total = countTris.at(itr);
-			currentPart = &m_parts.at(itr);
+			currentPart = m_parts.at(itr);
 			for (int i = 0; fcounter < total; fcounter++)
 			{
 				currentPart->addFace(&m_faces.at(fcounter));
@@ -443,42 +447,42 @@ namespace glwrap
 		if (m_parts.size() == 0)
 		{
 			m_parts.resize(m_parts.size() + 1);
-			m_context->createPart(m_parts.back(), m_self, "Default");
+			m_context->createPart(&m_parts.back(), m_self, "Default");
 		}
 
-		if (m_parts.at(0).getName() == "Default")
+		if (m_parts.at(0)->getName() == "Default")
 		{
-			return m_parts.at(0).setBuffer(_attribute, 0);
+			return m_parts.at(0)->setBuffer(_attribute, 0);
 		}
 		return nullptr;
 	}
 
 	void VertexArray::draw()
 	{
-		for (std::vector<ObjPart>::iterator itr = m_parts.begin();
+		for (std::vector<ObjPart*>::iterator itr = m_parts.begin();
 			itr != m_parts.end(); itr++)
 		{
-			itr->draw();
+			(*itr)->draw();
 		}
 	}
 
 	void VertexArray::cullAndDraw()
 	{
-		for (std::vector<ObjPart>::iterator itr = m_parts.begin();
+		for (std::vector<ObjPart*>::iterator itr = m_parts.begin();
 			itr != m_parts.end(); itr++)
 		{
-			itr->cullAndDraw(m_cullAnimated);
+			(*itr)->cullAndDraw(m_cullAnimated);
 		}
 	}
 
 	void VertexArray::drawPart(std::string _partName)
 	{
-		for (std::vector<ObjPart>::iterator itr = m_parts.begin();
+		for (std::vector<ObjPart*>::iterator itr = m_parts.begin();
 			itr != m_parts.end(); itr++)
 		{
-			if (itr->getName() == _partName)
+			if ((*itr)->getName() == _partName)
 			{
-				itr->draw();
+				(*itr)->draw();
 				return;
 			}
 		}
@@ -610,7 +614,7 @@ namespace glwrap
 		}
 	}
 
-	const std::vector<ObjPart>& VertexArray::getParts()
+	const std::vector<ObjPart*>& VertexArray::getParts()
 	{
 		return m_parts;
 	}
@@ -619,9 +623,9 @@ namespace glwrap
 	{
 		for (int partIndex = 0; partIndex < m_parts.size(); partIndex++)
 		{
-			if (m_parts.at(partIndex).getName() == _name)
+			if (m_parts.at(partIndex)->getName() == _name)
 			{
-				return &m_parts.at(partIndex);
+				return m_parts.at(partIndex);
 			}
 		}
 

@@ -71,7 +71,7 @@ namespace glwrap
 		/**
 		* \brief Create ObjPart within glwrap Context
 		*/
-		void createPart(ObjPart& _toInit, VertexArray* _mesh, std::string _name);
+		void createPart(ObjPart** _toInit, VertexArray* _mesh, std::string _name);
 		/**
 		* \brief Create Model within glwrap Context using .gltf
 		*/
@@ -142,6 +142,10 @@ namespace glwrap
 		VertexArray* m_simpleShape = nullptr; //!< Simple quad for drawing to screens entirety
 
 		Context* m_self; //!< Pointer to self to be passed into created object
+
+		static bool m_live;
+
+		Context();
 
 	};
 }

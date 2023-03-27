@@ -91,37 +91,38 @@ namespace glwrap
 
 	VertexBuffer* ObjPart::setBuffer(std::string _attribute, int _materialId)
 	{
+		int pos = 0;
 		if (_attribute == "in_Position")
-		{
-			return &m_buffers.at(_materialId).at(0);
+		{	
 		}
 		else if (_attribute == "in_Color")
 		{
-			return &m_buffers.at(_materialId).at(1);
+			pos = 1;
 		}
 		else if (_attribute == "in_TexCoord")
 		{
-			return &m_buffers.at(_materialId).at(2);
+			pos = 2;
 		}
 		else if (_attribute == "in_Normal")
 		{
-			return &m_buffers.at(_materialId).at(3);
+			pos = 3;
 		}
 		else if (_attribute == "in_JointIDs")
 		{
-			return &m_buffers.at(_materialId).at(4);
+			pos = 4;
 		}
 		else if (_attribute == "in_Weights")
 		{
-			return &m_buffers.at(_materialId).at(5);
+			pos = 5;
 		}
 		else if (_attribute == "in_Tangent")
 		{
-			return &m_buffers.at(_materialId).at(6);
+			pos = 6;
+
 		}
 		else if (_attribute == "in_Bitangent")
 		{
-			return &m_buffers.at(_materialId).at(7);
+			pos = 7;
 		}
 		else
 		{
@@ -129,6 +130,7 @@ namespace glwrap
 		}
 
 		m_dirty = true;
+		return &m_buffers.at(_materialId).at(pos);
 	}
 
 	int ObjPart::getVertexCount(int _materialId)
@@ -150,7 +152,7 @@ namespace glwrap
 				glBindVertexArray(m_idList.at(matId));
 				for (int i = 0; i < m_buffers.at(matId).size(); i++)
 				{
-					if (m_buffers.at(matId).at(i).getComponents() == 0)
+					if (m_buffers.at(matId).at(i).getComponents() != 0)
 					{
 						glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(matId).at(i).getId());
 

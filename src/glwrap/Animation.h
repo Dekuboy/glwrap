@@ -60,7 +60,7 @@ namespace glwrap
 		double m_time; //!< Current frame of animation
 		bool m_enabled; //!< Is animation set to play when the model is drawn
 		bool m_repeating; //!< Does the animation repeat once it has finished
-		Context* m_context = nullptr; //!< Pointer to glwrap context
+		Context* m_context; //!< Pointer to glwrap context
 
 	};
 }

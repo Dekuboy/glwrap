@@ -9,29 +9,35 @@ namespace glwrap
 			throw std::exception();
 		}
 
-		VertexBuffer positions;
-		positions.add(glm::vec2(-1.0f, 1.0f));
-		positions.add(glm::vec2(-1.0f, -1.0f));
-		positions.add(glm::vec2(1.0f, -1.0f));
-		positions.add(glm::vec2(1.0f, -1.0f));
-		positions.add(glm::vec2(1.0f, 1.0f));
-		positions.add(glm::vec2(-1.0f, 1.0f));
+		VertexBuffer* positions;
 
-		VertexBuffer texCoords;
-		texCoords.add(glm::vec2(0.0f, 0.0f));
-		texCoords.add(glm::vec2(0.0f, -1.0f));
-		texCoords.add(glm::vec2(1.0f, -1.0f));
-		texCoords.add(glm::vec2(1.0f, -1.0f));
-		texCoords.add(glm::vec2(1.0f, 0.0f));
-		texCoords.add(glm::vec2(0.0f, 0.0f));
+		VertexBuffer* texCoords;
 
 		_toInit.m_self = &_toInit;
 
 		_toInit.m_simpleShape = new VertexArray();
 		_toInit.createMesh(*_toInit.m_simpleShape);
-		_toInit.m_simpleShape->setBuffer("in_Position", positions);
-		_toInit.m_simpleShape->setBuffer("in_TexCoord", texCoords);
+		positions = _toInit.m_simpleShape->setBuffer("in_Position");
+		texCoords = _toInit.m_simpleShape->setBuffer("in_TexCoord");
+
+		positions->add(glm::vec2(-1.0f, 1.0f));
+		positions->add(glm::vec2(-1.0f, -1.0f));
+		positions->add(glm::vec2(1.0f, -1.0f));
+		positions->add(glm::vec2(1.0f, -1.0f));
+		positions->add(glm::vec2(1.0f, 1.0f));
+		positions->add(glm::vec2(-1.0f, 1.0f));
+
+		texCoords->add(glm::vec2(0.0f, 0.0f));
+		texCoords->add(glm::vec2(0.0f, -1.0f));
+		texCoords->add(glm::vec2(1.0f, -1.0f));
+		texCoords->add(glm::vec2(1.0f, -1.0f));
+		texCoords->add(glm::vec2(1.0f, 0.0f));
+		texCoords->add(glm::vec2(0.0f, 0.0f));
+
+		m_live = true;
 	}
+
+	bool Context::m_live = false;
 
 	Context::~Context()
 	{
@@ -113,12 +119,11 @@ namespace glwrap
 		return rtn;
 	}
 
-	void Context::createPart(ObjPart& _toInit, VertexArray* _mesh, std::string _name)
+	void Context::createPart(ObjPart** _toInit, VertexArray* _mesh, std::string _name)
 	{
-		std::shared_ptr<ObjPart> rtn = std::make_shared<ObjPart>(_mesh, _name);
-		rtn->m_context = m_self;
-		rtn->m_self = rtn;
-		return rtn;
+		*_toInit = new ObjPart(_name);
+		(* _toInit)->m_context = m_self;
+		(*_toInit)->m_self = (*_toInit);
 	}
 
 	void Context::createModel(GltfModel& _toInit, std::string _path)
@@ -139,9 +144,8 @@ namespace glwrap
 
 	void Context::createModelJoint(ModelJoint& _toInit, std::string _name)
 	{
-		ModelJoint rtn(_name);
-		rtn.m_context = m_self;
-		return rtn;
+		_toInit = ModelJoint(_name);
+		_toInit.m_context = m_self;
 	}
 
 	void Context::createAnimation(ObjAnimation& _toInit, VertexArray* _model)
