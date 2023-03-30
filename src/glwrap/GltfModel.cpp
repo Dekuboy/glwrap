@@ -1540,8 +1540,7 @@ namespace glwrap
 			indicesData = &_data.at(primItr->m_indices).m_ushort;
 
 			// Prepare position buffer
-			_part->setBuffer("in_Position", VertexBuffer(), matCount);
-			buffer = &_part->m_buffers.at(matCount).at(0);
+			buffer = _part->setBuffer("in_Position", matCount);
 			{
 				// Get the position value
 				accPointer = &_accessors.at(primItr->m_positionId);
@@ -1666,8 +1665,7 @@ namespace glwrap
 			if (primItr->m_normalId > -1)
 			{
 				// Prepare normal buffer
-				_part->setBuffer("in_Normal", VertexBuffer(), matCount);
-				buffer = &_part->m_buffers.at(matCount).at(3);
+				buffer = _part->setBuffer("in_Normal", matCount);
 				// Retrieve data where normal values are located
 				floatList = &_data.at(primItr->m_normalId).m_float;
 				// Set values to tri faces and buffer
@@ -1699,8 +1697,7 @@ namespace glwrap
 			if (primItr->m_texCoordId > -1)
 			{
 				// Prepare texture coordinate buffer
-				_part->setBuffer("in_TexCoord", VertexBuffer(), matCount);
-				buffer = &_part->m_buffers.at(matCount).at(2);
+				buffer = _part->setBuffer("in_TexCoord", matCount);
 				// Retrieve data where texture coordinate values are located
 				floatList = &_data.at(primItr->m_texCoordId).m_float;
 				// Set values to tri faces and buffer
@@ -1728,8 +1725,7 @@ namespace glwrap
 			if (primItr->m_jointsId > -1)
 			{
 				// Prepare joints buffer
-				_part->setBuffer("in_JointIDs", VertexBuffer(), matCount);
-				buffer = &_part->m_buffers.at(matCount).at(4);
+				buffer = _part->setBuffer("in_JointIDs", matCount);
 				// Retrieve data where joints values are located
 				accPointer = &_accessors.at(primItr->m_jointsId);
 				// Set values to buffer 
@@ -1764,8 +1760,7 @@ namespace glwrap
 			if (primItr->m_weightsId > -1)
 			{
 				// Prepare weights buffer
-				_part->setBuffer("in_Weights", VertexBuffer(), matCount);
-				buffer = &_part->m_buffers.at(matCount).at(5);
+				buffer = _part->setBuffer("in_Weights", matCount);
 				// Retrieve data where weights data is located
 				floatList = &_data.at(primItr->m_weightsId).m_float;
 				// Set values to buffer
@@ -1812,7 +1807,7 @@ namespace glwrap
 			matCount++;
 		}
 		// Set total part size when values are resolved
-		_part->m_size = _part->m_maxPoint - _part->m_minPoint;
+		_part->getSize() = _part->m_maxPoint - _part->m_minPoint;
 	}
 
 	void GltfModel::assembleChildren(std::vector<gltfparse::Node>& _nodes, int _parentModelNode)

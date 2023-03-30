@@ -4,12 +4,14 @@
 
 namespace glwrap
 {
+	class ArrayPiece;
+
 	class BufferArray
 	{
 	public:
 
 	private:
-
+		friend class ArrayPiece;
 
 	};
 }

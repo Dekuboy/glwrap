@@ -16,7 +16,6 @@ namespace glwrap
 	ObjPart::ObjPart(std::string _name)
 	{
 		m_name = _name;
-		m_animationUniform = glm::mat4(1);
 		m_useMaterial = false;
 
 		generateArrays();
@@ -27,175 +26,73 @@ namespace glwrap
 		glDeleteVertexArrays(m_idList.size(), &m_idList.at(0));
 	}
 
-	std::string ObjPart::getName()
-	{
-		return m_name;
-	}
-
-	const std::vector<TriFace*>& ObjPart::getFaces()
-	{
-		return m_faces;
-	}
-
 	void ObjPart::addFace(TriFace* _face)
 	{
+		if (!m_faces.size())
+		{
+			m_maxPoint.x = std::numeric_limits<float>::min();
+			m_maxPoint.y = std::numeric_limits<float>::min();
+			m_maxPoint.z = std::numeric_limits<float>::min();
+
+			m_minPoint.x = std::numeric_limits<float>::max();
+			m_minPoint.y = std::numeric_limits<float>::max();
+			m_minPoint.z = std::numeric_limits<float>::max();
+		}
+
 		m_faces.push_back(_face);
 
-		if (m_faces.size() == 1)
+		if (m_faces.back()->getMaxX() > m_maxPoint.x)
 		{
-			m_maxX = std::numeric_limits<float>::min();
-			m_maxY = std::numeric_limits<float>::min();
-			m_maxZ = std::numeric_limits<float>::min();
-
-			m_minX = std::numeric_limits<float>::max();
-			m_minY = std::numeric_limits<float>::max();
-			m_minZ = std::numeric_limits<float>::max();
+			m_maxPoint.x = _face->getMaxX();
 		}
 
-		if (m_faces.back()->getMaxX() > m_maxX)
+		if (m_faces.back()->getMaxY() > m_maxPoint.y)
 		{
-			m_maxX = _face->getMaxX();
+			m_maxPoint.y = _face->getMaxY();
 		}
 
-		if (m_faces.back()->getMaxY() > m_maxY)
+		if (m_faces.back()->getMaxZ() > m_maxPoint.z)
 		{
-			m_maxY = _face->getMaxY();
+			m_maxPoint.z = _face->getMaxZ();
 		}
 
-		if (m_faces.back()->getMaxZ() > m_maxZ)
+		if (m_faces.back()->getMinX() < m_minPoint.x)
 		{
-			m_maxZ = _face->getMaxZ();
+			m_minPoint.x = _face->getMinX();
 		}
 
-		if (m_faces.back()->getMinX() < m_minX)
+		if (m_faces.back()->getMinY() < m_minPoint.y)
 		{
-			m_minX = _face->getMinX();
+			m_minPoint.y = _face->getMinY();
 		}
 
-		if (m_faces.back()->getMinY() < m_minY)
+		if (m_faces.back()->getMinZ() < m_minPoint.z)
 		{
-			m_minY = _face->getMinY();
+			m_minPoint.z = _face->getMinZ();
 		}
 
-		if (m_faces.back()->getMinZ() < m_minZ)
-		{
-			m_minZ = _face->getMinZ();
-		}
-
-		m_offsetX = (m_minX + m_maxX) / 2;
-		m_offsetY = (m_minY + m_maxY) / 2;
-		m_offsetZ = (m_minZ + m_maxZ) / 2;
+		m_offset = (m_minPoint + m_maxPoint) / 2.0f;
 
 		m_dirty = true;
-	}
-
-	VertexBuffer* ObjPart::setBuffer(std::string _attribute, int _materialId)
-	{
-		int pos = 0;
-		if (_attribute == "in_Position")
-		{	
-		}
-		else if (_attribute == "in_Color")
-		{
-			pos = 1;
-		}
-		else if (_attribute == "in_TexCoord")
-		{
-			pos = 2;
-		}
-		else if (_attribute == "in_Normal")
-		{
-			pos = 3;
-		}
-		else if (_attribute == "in_JointIDs")
-		{
-			pos = 4;
-		}
-		else if (_attribute == "in_Weights")
-		{
-			pos = 5;
-		}
-		else if (_attribute == "in_Tangent")
-		{
-			pos = 6;
-
-		}
-		else if (_attribute == "in_Bitangent")
-		{
-			pos = 7;
-		}
-		else
-		{
-			throw std::exception();
-		}
-
-		m_dirty = true;
-		return &m_buffers.at(_materialId).at(pos);
-	}
-
-	int ObjPart::getVertexCount(int _materialId)
-	{
-		if (m_buffers.size() < 1)
-		{
-			throw std::exception();
-		}
-
-		return m_buffers.at(_materialId).at(0).getDataSize() / m_buffers.at(_materialId).at(0).getComponents();
-	}
-
-	GLuint ObjPart::getId(int _materialId)
-	{
-		if (m_dirty)
-		{
-			for (int matId = 0; matId < m_idList.size(); matId++)
-			{
-				glBindVertexArray(m_idList.at(matId));
-				for (int i = 0; i < m_buffers.at(matId).size(); i++)
-				{
-					if (m_buffers.at(matId).at(i).getComponents() != 0)
-					{
-						glBindBuffer(GL_ARRAY_BUFFER, m_buffers.at(matId).at(i).getId());
-
-						glVertexAttribPointer(i, m_buffers.at(matId).at(i).getComponents(), GL_FLOAT, GL_FALSE,
-							m_buffers.at(matId).at(i).getComponents() * sizeof(GLfloat), (void*)0);
-
-						glEnableVertexAttribArray(i);
-					}
-					else
-					{
-						glDisableVertexAttribArray(i);
-					}
-				}
-			}
-
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-			m_dirty = false;
-		}
-
-		return m_idList.at(_materialId);
 	}
 
 	void ObjPart::draw()
 	{
-		glm::vec3 translateVector(m_offsetX, m_offsetY, m_offsetZ);
-
-		m_animationUniform = glm::translate(m_animationUniform, translateVector);
+		m_animationUniform = glm::translate(m_animationUniform, m_offset);
 		translate();
-		m_animationUniform = glm::translate(m_animationUniform, -translateVector);
+		m_animationUniform = glm::translate(m_animationUniform, -m_offset);
 
 		drawArrays();
 	}
 
 	void ObjPart::cullAndDraw(bool _cullAnimated)
 	{
-		glm::vec3 translateVector(m_offsetX, m_offsetY, m_offsetZ);
 		ShaderProgram* shader = m_context->getCurrentShader();
 
-		m_animationUniform = glm::translate(m_animationUniform, translateVector);
+		m_animationUniform = glm::translate(m_animationUniform, m_offset);
 		translate();
 		glm::vec3 partCentre = m_animationUniform * glm::vec4(0, 0, 0, 1);
-		m_animationUniform = glm::translate(m_animationUniform, -translateVector);
+		m_animationUniform = glm::translate(m_animationUniform, -m_offset);
 
 		if (_cullAnimated)
 		{
@@ -239,16 +136,6 @@ namespace glwrap
 				m_animationUniform = glm::mat4(1);
 			}
 		}
-	}
-
-	glm::vec3 ObjPart::getSize()
-	{
-		return glm::vec3(m_maxX - m_minX, m_maxY - m_minY, m_maxZ - m_minZ);
-	}
-
-	glm::vec3 ObjPart::getCentre()
-	{
-		return glm::vec3(m_offsetX, m_offsetY, m_offsetZ);
 	}
 
 	void ObjPart::translate()
@@ -330,20 +217,5 @@ namespace glwrap
 			m_animationUniform = glm::mat4(1);
 			shader->setUniform("in_Animate", m_animationUniform);
 		}
-	}
-
-	void ObjPart::generateArrays()
-	{
-		m_buffers.resize(m_buffers.size() + 1);
-		m_idList.resize(m_idList.size() + 1);
-
-		glGenVertexArrays(1, &m_idList.back());
-
-		if (!m_idList.back())
-		{
-			throw std::exception();
-		}
-
-		m_buffers.back().resize(8);
 	}
 }
